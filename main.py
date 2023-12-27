@@ -1,8 +1,12 @@
+import sys
+print(sys.executable)
+
 import requests
 from bs4 import BeautifulSoup
-from google_images_search import GoogleImagesSearch
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 
@@ -12,8 +16,17 @@ chrome_options.add_argument("--headless")
 # Initialize WebDriver
 driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
 
+# Get user input
+'''
+model = "Accord"
+year = input("Enter model year: ")
+trim = input("Enter car trim: ")
+miles = input("Enter car miles: ")
+'''
+
+
 # Open the web page
-driver.get("https://www.mac.bid")
+driver.get("https://www.carfax.com/cars-for-sale")
 
 # Wait for JavaScript to load
 driver.implicitly_wait(10)  # Waits for 10 seconds
@@ -21,114 +34,47 @@ driver.implicitly_wait(10)  # Waits for 10 seconds
 # Now you can parse the HTML content
 html_content = driver.page_source
 print(html_content)
-# You can use BeautifulSoup here if needed
 
-# Example: Extracting the title of the page
-title = driver.find_element(By.TAG_NAME, "title").get_attribute('textContent')
-print(title)
+# Locate the make dropdown and create a Select object
+wait = WebDriverWait(driver, 10)  # Adjust the timeout as necessary
+make_dropdown = wait.until(EC.presence_of_element_located((By.ID, "undefined-make-input")))
+make_dropdown = Select(driver.find_element_by_id("undefined-make-input"))
 
-# Close the browser
-driver.quit()
+# Retrieve and display all make options
+print("Available Makes:")
+make_options = [option.text for option in make_dropdown.options]
+print(make_options)
 
-# Set your config for Google API
-gis = GoogleImagesSearch('your_dev_api_key', 'your_project_cx')
+# Get user input for make
+make = input("Enter make: ")
+while make not in make_options:
+    print("ERROR - Invalid make")
+    make = input("Enter make: ")
 
-def scrape_auction_data(base_url):
-    """
-    Scrape auction data from the given base URL of the auction website.
+# Select the user make in order for web page to refresh
+make_dropdown.select_by_visible_text(make)
 
-    Parameters:
-    base_url (str): The base URL of the auction website.
+# Locate the model dropdown and create a Select object
+# Wait for the model dropdown to be populated
+wait = WebDriverWait(driver, 10)  # Adjust the timeout as necessary
+model_dropdown_id = "undefined-model-input"
+wait.until(EC.presence_of_element_located((By.ID, model_dropdown_id)))
+wait.until(lambda driver: Select(driver.find_element_by_id(model_dropdown_id)).options[1].text != "All Models")
+model_dropdown = Select(driver.find_element_by_id(model_dropdown_id))
 
-    Returns:
-    list of dict: A list of dictionaries containing auction data.
-    """
-    auction_data = []
+# Retrieve and display all model options
+print("Available Models:")
+model_options = [option.text for option in model_dropdown.options]
+print(model_options)
 
-    # Connect to the base URL and retrieve the page content
-    base_url = 'https://www.mac.bid'  # Replace with the actual base URL
-    response = requests.get(base_url)
-    print(response)
+# Function to enter user input into search options
+def search_option(make, model, year, trim, miles):
+   # Select the make based on user input
+    make_dropdown.select_by_visible_text(make)
 
-    # Check if the request was successful
-    if response.status_code != 200:
-        print(f"Failed to retrieve data from {base_url}")
-    else:
-        soup = BeautifulSoup(response.content, 'html.parser')
+    # Locate the model dropdown and create a Select object
+    model_dropdown = Select(driver.find_element_by_id("undefined-model-input"))
 
-        # You need to adjust the selectors based on the actual HTML structure of the website
-        auction_links = soup.select('selector_for_auction_links')  # Replace with the actual selector for auction links
-
-        # Extract the URLs of the auction pages
-        auction_urls = [base_url + link['href'] for link in auction_links]
-
-        # Iterate through the auction pages and scrape the data
-        for url in auction_urls:
-            response = requests.get(url)
-
-            # Check if the request was successful
-            if response.status_code != 200:
-                print(f"Failed to retrieve data from {url}")
-                continue
-
-            soup = BeautifulSoup(response.content, 'html.parser')
-
-            # You need to adjust the selectors based on the actual HTML structure of the website
-            end_time = soup.find('selector_for_end_time').text
-            bid_price = soup.find('selector_for_bid_price').text
-            image_url = soup.find('selector_for_image')['src']  # Assuming the image URL is in the 'src' attribute
-
-            auction_data.append({
-                'end_time': end_time,
-                'bid_price': bid_price,
-                'image_url': image_url,
-                'auction_url': url
-            })
-
-    return auction_data
-
-    for url in auction_urls:
-        response = requests.get(url)
-        
-        # Check if the request was successful
-        if response.status_code != 200:
-            print(f"Failed to retrieve data from {url}")
-            continue
-
-        soup = BeautifulSoup(response.content, 'html.parser')
-
-        # You need to adjust the selectors based on the actual HTML structure of the website
-        end_time = soup.find('selector_for_end_time').text
-        bid_price = soup.find('selector_for_bid_price').text
-        image_url = soup.find('selector_for_image')['src']  # Assuming the image URL is in the 'src' attribute
-
-        auction_data.append({
-            'end_time': end_time,
-            'bid_price': bid_price,
-            'image_url': image_url,
-            'auction_url': url
-        })
-
-    return auction_data
-
-def reverse_image_search(image_url):
-    # Implement reverse image search logic
-    pass
-
-def calculate_profit_margin():
-    # Logic to calculate profitability
-    pass
-
-def automated_bidding():
-    # Logic for automated bidding
-    pass
-
-if __name__ == "__main__":
-    # Main script execution
-    pass
-
-
-# Example usage
-base_url = 'https://www.mac.bid'  # Replace with the actual base URL
-data = scrape_auction_data(base_url)
-print(data)
+    # Now select the model
+    model_dropdown = Select(driver.find_element_by_id(model_dropdown_id))
+    model_dropdown.select_by_visible_text(model)
