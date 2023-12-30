@@ -16,15 +16,6 @@ chrome_options = Options()
 # Initialize WebDriver
 driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
 
-# Get user input
-'''
-model = "Accord"
-year = input("Enter model year: ")
-trim = input("Enter car trim: ")
-miles = input("Enter car miles: ")
-'''
-
-
 # Open the web page
 driver.get("https://www.carfax.com/cars-for-sale")
 
@@ -133,10 +124,20 @@ def get_user_input():
 
     # Click the checkbox
     checkbox_element.click()
+
+    # Adjust search radius to be unlimited
+    radius_dropdown = Select(driver.find_element_by_id("radius"))
+    radius_dropdown.select_by_visible_text("Unlimited")
+
+    # Click the search button
+    search_button = driver.find_element(By.XPATH, "//button[contains(., 'Show Me')]")
+    search_button.click()
+
     return make, model, min_year, max_year, trim
 
 make, model, min_year, max_year, trim = get_user_input()
 
 # PART 2 - Function to generate plot from filtered serach results
 def plot_search_results():
+    
     return
