@@ -59,6 +59,7 @@ for div in soup.find_all("div", class_="srp-listing-content"):
             has_damage = False
             condition = accident_tag.get_text(strip=True)
             condition_lower = condition.lower()
+            print(condition)
             if "no " not in condition_lower:
                 if "accident" in condition_lower:
                     has_accident = True
@@ -161,7 +162,7 @@ print("Intercept for cars without accidents:", intercept_without_accidents)
 def create_scatter_trace(listings, name, color):
     x = [listing['Mileage'] for listing in listings]
     y = [listing['Price'] for listing in listings]
-    text = [f"<img src='{listing['Image_URL']}' width='100px'><br>{listing['Title']}<br>Mileage: {listing['Mileage']}<br>Condition: {listing['Condition']}<br>VIN: {listing['VIN']}<br>URL: {listing['URL']}" for listing in listings]
+    text = [f"<strong>listing['Title']</strong><br>Price: {listing['Price']}<br>Mileage: {listing['Mileage']}<br>Condition: {listing['Condition']}<br>VIN: {listing['VIN']}<br>URL: {listing['URL']}" for listing in listings]
     return go.Scatter(x=x, y=y, mode='markers', name=name, marker_color=color, text=text, hoverinfo='text')
 
 # Create scatter traces
