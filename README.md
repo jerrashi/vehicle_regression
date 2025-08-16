@@ -1,1 +1,2 @@
 # vehicle_regression
+After a car accident damaged my car, I sought to prove in court that cars with accidents on their record are listed for less than comparable cars without accidents on their record. In order to do this, I scraped data from carfax and plotted all listings I could find for 2012 Honda Accords (the same make and model as my car) with prices on the x axis and mileage on the y axis. It showed that there is a correlation between accidents and lower prices, even at the same mileage.
